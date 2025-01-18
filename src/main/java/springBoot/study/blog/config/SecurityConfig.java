@@ -8,19 +8,27 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import springBoot.study.blog.security.JwtAuthenticationEntryPoint;
+import springBoot.study.blog.security.JwtAuthenticationFilter;
+
 @EnableMethodSecurity
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
-    private UserDetailsService userDetailsService;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    public SecurityConfig(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
+
+    public SecurityConfig(
+                          JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint ,
+                           JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
@@ -46,11 +54,16 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeHttpRequests((authorize)->
-                     //   authorize.anyRequest().authenticated()
                         authorize.requestMatchers(HttpMethod.GET , "/api/**")
                                 .permitAll()
                                 .requestMatchers("api/auth/**")
-                                .permitAll().anyRequest().authenticated()).httpBasic(Customizer.withDefaults());
+                                .permitAll().anyRequest().authenticated()).httpBasic(Customizer.withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
+
+        http.addFilterBefore(jwtAuthenticationFilter , UsernamePasswordAuthenticationFilter.class);
+
+
         return http.build();
     }
 }

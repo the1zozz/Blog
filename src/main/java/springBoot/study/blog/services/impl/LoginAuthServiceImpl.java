@@ -14,6 +14,7 @@ import springBoot.study.blog.models.Role;
 import springBoot.study.blog.models.User;
 import springBoot.study.blog.repository.RoleRepository;
 import springBoot.study.blog.repository.UserRepository;
+import springBoot.study.blog.security.JwtTokenProvider;
 import springBoot.study.blog.services.LoginAuthService;
 
 import java.util.HashSet;
@@ -21,20 +22,23 @@ import java.util.Set;
 
 @Service
 public class LoginAuthServiceImpl implements LoginAuthService {
-    AuthenticationManager authenticationManager;
-    UserRepository userRepository;
-    RoleRepository roleRepository;
-    PasswordEncoder passwordEncoder;
+    private AuthenticationManager authenticationManager;
+    private UserRepository userRepository;
+    private RoleRepository roleRepository;
+    private PasswordEncoder passwordEncoder;
+    private JwtTokenProvider jwtTokenProvider;
 
 
     public LoginAuthServiceImpl(AuthenticationManager authenticationManager ,
                                 UserRepository userRepository,
                                 RoleRepository roleRepository,
-                                PasswordEncoder passwordEncoder) {
+                                PasswordEncoder passwordEncoder ,
+                                JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -43,7 +47,10 @@ public class LoginAuthServiceImpl implements LoginAuthService {
                 loginDto.getUsernameOrEmail(), loginDto.getPassword()
         ));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
-        return "User Logged in successfully";
+
+        String token = jwtTokenProvider.createToken(authenticate);
+
+        return token;
     }
 
     @Override
