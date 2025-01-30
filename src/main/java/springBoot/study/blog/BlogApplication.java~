@@ -13,11 +13,7 @@ import org.springframework.context.annotation.Bean;
 @Info(
 		title = "SpringBoot Blog API",
 		version = "1.0",
-		description = "SpringBoot Blog API",
-		contact = @Contact(
-				name = "Moaaz",
-				email = "moazatef435@gmail.com"
-		)
+		description = "SpringBoot Blog API"
 )
 )
 public class BlogApplication {
