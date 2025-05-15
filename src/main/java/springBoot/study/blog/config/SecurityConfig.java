@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,6 +20,7 @@ import springBoot.study.blog.security.JwtAuthenticationEntryPoint;
 import springBoot.study.blog.security.JwtAuthenticationFilter;
 
 @EnableMethodSecurity
+@EnableWebSecurity
 @Configuration
 @SecurityScheme(
         name = "Bearer Authentication",
@@ -27,16 +28,18 @@ import springBoot.study.blog.security.JwtAuthenticationFilter;
         bearerFormat = "JWT",
         scheme = "bearer"
 )
-public class SecurityConfig {
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+public class SecurityConfig  {
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
 
     public SecurityConfig(
                           JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint ,
+
                            JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+
     }
 
     @Bean
@@ -47,6 +50,7 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
     // IN MEMORY
 //    @Bean
 //    public UserDetailsService userDetailsService(){
@@ -62,8 +66,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeHttpRequests((authorize)->
-                        authorize.requestMatchers(HttpMethod.GET , "/api/**")
-                                .permitAll()
+                        authorize.requestMatchers(HttpMethod.GET , "/api/**").permitAll()
                                 .requestMatchers("api/auth/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
@@ -76,4 +79,6 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+
 }

@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostResponse {
-    private List<PostDto> content;
+    private List<PostDtoResponse> content;
     private int pagaeNo ;
     private int pageSize ;
     private long totalElement ;
